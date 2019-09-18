@@ -30,6 +30,8 @@ func main() {
 		TestData{A: []int{1}, B: []int{-3, -2, -1}, Result: float64(-1.5)},
 		TestData{A: []int{10}, B: []int{1, 2, 3, 4}, Result: float64(3)},
 		TestData{A: []int{10}, B: []int{1, 2, 3}, Result: float64(2.5)},
+		TestData{A: []int{1, 10, 20}, B: []int{2, 3, 12, 13, 14, 15}, Result: float64(12)},
+		TestData{A: []int{20, 21, 22, 23, 24, 25}, B: []int{2, 12, 13, 14, 15}, Result: float64(20)},
 	}
 	for _, testSet := range testData {
 		if r := findMedianSortedArrays(testSet.A, testSet.B); r != testSet.Result {
@@ -65,8 +67,11 @@ func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
 	// and start to joggling elements left or right until we get parity
 	for {
 		log.Println("i=", i, "j=", j)
+		if j > 10 || i > 10 {
+			panic("error")
+		}
 		// median will be in the left half
-		if i+j+f == len(nums1)-i+len(nums2)-j {
+		if i+j+f == len(nums1)-i+len(nums2)-j && (i == 0 || j == len(nums2) || j == 0 || i == len(nums1) || nums1[i-1] <= nums2[j]) {
 			if f == 0 {
 				var left int
 				var right int
