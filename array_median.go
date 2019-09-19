@@ -34,13 +34,75 @@ func main() {
 		TestData{A: []int{20, 21, 22, 23, 24, 25}, B: []int{2, 12, 13, 14, 15}, Result: float64(20)},
 	}
 	for _, testSet := range testData {
-		if r := findMedianSortedArrays(testSet.A, testSet.B); r != testSet.Result {
+		if r := findMedianSortedArrays2(testSet.A, testSet.B); r != testSet.Result {
 			log.Fatalln("Incorrect result: ", r)
 		} else {
 			log.Println("Correct result: ", r)
 		}
 	}
 	log.Println("Finish")
+}
+
+func findMedianSortedArrays2(nums1 []int, nums2 []int) float64 {
+	log.Println(nums1)
+	log.Println(nums2)
+
+	if len(nums1) == 0 {
+		return arrayMedian(nums2)
+	} else if len(nums2) == 0 {
+		return arrayMedian(nums1)
+	}
+
+	// what diff in slices do we need before we are ready for median
+	f := 1
+	if math.Mod(float64(len(nums1)+len(nums2)), 2) == 0 {
+		f = 0
+	}
+	log.Println(f)
+
+	i := centerPosition(nums1)
+	j := centerPosition(nums2)
+
+	steps := 0
+	for {
+		log.Println("i=", i, ", j=", j)
+		if i+1+j+1+f > len(nums1)-i-1+len(nums2)-j-1 { // left side is bigger -- it donates
+			if nums1[i] > nums2[j] { // nums1 donates
+				if i == 0 { // edge case -- indicate that nums1 has no elements for the left side
+					i = -1
+				} else {
+					i = int(math.Round(float64(i+1)/2)) - 1
+				}
+			} else { // nums2 donates
+				if j == 0 { // edge case -- indicate that nums2 has no elements for the left side
+					j = -1
+				} else {
+					j = int(math.Round(float64(j+1)/2)) - 1
+				}
+			}
+		} else if i+1+j+1+f < len(nums1)-i-1+len(nums2)-j-1 { // right side is bigger -- it donates
+			if nums1[i+1] < nums2[j+1] { // nums1 donates
+				i = int(math.Round(float64(len(nums1)-i-1)/2)) + i
+			} else { // nums2 donates
+				j = int(math.Round(float64(len(nums2)-j-1)/2)) + j
+			}
+		} else { // balanced
+			// but is it balanced to median
+			if safeMax(nums1, nums2, i, j) > safeMin(nums1, nums2, i+1, j+1) { // no
+				panic("no balance!")
+			}
+			if f == 0 {
+				return float64(safeMax(nums1, nums2, i, j)+safeMin(nums1, nums2, i+1, j+1)) / 2
+			} else {
+				// edge cases first -- nums1 or nums2 do not contribute to the right side
+				return float64(safeMin(nums1, nums2, i+1, j+1))
+			}
+		}
+		steps++
+		if steps > 10 {
+			panic("error")
+		}
+	}
 }
 
 func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
@@ -114,7 +176,6 @@ func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
 			i++
 		}
 	}
-
 }
 
 func max(a, b int) int {
@@ -129,6 +190,33 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// some of the indexes must be valid
+func safeMin(arr1, arr2 []int, i, j int) int {
+	if i < 0 || i >= len(arr1) {
+		return arr2[j]
+	}
+	if j < 0 || j >= len(arr2) {
+		return arr1[i]
+	}
+	if arr1[i] < arr2[j] {
+		return arr1[i]
+	}
+	return arr2[j]
+}
+
+func safeMax(arr1, arr2 []int, i, j int) int {
+	if i < 0 || i >= len(arr1) {
+		return arr2[j]
+	}
+	if j < 0 || j >= len(arr2) {
+		return arr1[i]
+	}
+	if arr1[i] > arr2[j] {
+		return arr1[i]
+	}
+	return arr2[j]
 }
 
 func arrayMedian(arr []int) float64 {
