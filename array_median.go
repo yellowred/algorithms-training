@@ -63,39 +63,40 @@ func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
 	}
 	log.Println(f)
 
-	i := centerPosition(nums1)
-	j := centerPosition(nums2)
+	i,j := 0,0
+	shift_i := centerPosition(nums1)
+	shift_j := centerPosition(nums2)
 
 	steps := 0
 	for {
-		log.Println("i=", i, ", j=", j)
+		log.Println("i=", i, ", j=", j, ", shift_i=", shift_i, ", shift_j=", shift_j)
 		if largestSide(nums1, nums2, i, j, f)<0 || (largestSide(nums1, nums2, i, j, f)==0 && (safeMax(nums1, nums2, i, j) > safeMin(nums1, nums2, i+1, j+1))) { // left side is bigger -- it donates
 			if j<0 || i>=0 && nums1[i] > nums2[j] { // nums1 donates
-				if i == 0 { // edge case -- indicate that nums1 has no elements for the left side
+				i = i -shift_i
+				if i < 0 { // so we can find right neighbour
 					i = -1
-				} else {
-					i = int(math.Round(float64(i+1)/2)) - 1
 				}
+				shift_i = lowerShift(shift_i)
 			} else { // nums2 donates
-				if j == 0 { // edge case -- indicate that nums2 has no elements for the left side
+				j = j-shift_j
+				if j < 0 { // so we can find right neighbour
 					j = -1
-				} else {
-					j = int(math.Round(float64(j+1)/2)) - 1
 				}
+				shift_j = lowerShift(shift_j)
 			}
-		} else if i+1+j+1+f < len(nums1)-i-1+len(nums2)-j-1 { // right side is bigger -- it donates
+		} else if largestSide(nums1, nums2, i, j, f)>0 { // right side is bigger -- it donates
 			if j == len(nums2) -1 || i < len(nums1)-1 && nums1[i+1] < nums2[j+1] { // nums1 donates
-				shift := int(float64(len(nums1)-i-1)/2)
-				if shift == 0 {
-					shift = 1
+				i = i +shift_i
+				if i > len(nums1) { // so we can find right neighbour
+					i = len(nums1)
 				}
-				i = shift + i
+				shift_i = lowerShift(shift_i)
 			} else { // nums2 donates
-				shift := int(float64(len(nums2)-j-1)/2)
-				if shift == 0 {
-					shift = 1
+				j = j + shift_j
+				if j > len(nums2) { // so we can find right neighbour
+					j = len(nums2)
 				}
-				j = shift + j
+				shift_j = lowerShift(shift_j)
 			}
 		} else { // balanced
 				if f == 0 {
@@ -110,6 +111,14 @@ func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
 			panic("error")
 		}
 	}
+}
+
+func lowerShift(shift int) int {
+	shift--
+	if shift <=0 {
+		return 1
+	}
+	return shift
 }
 
 func largestSide(nums1, nums2 []int, i, j, f int) int {
@@ -157,5 +166,5 @@ func arrayMedian(arr []int) float64 {
 
 
 func centerPosition(nums []int) int {
-	return int(math.Round(float64(len(nums))/2)) - 1
+	return int(math.Round(float64(len(nums))/2))
 }
