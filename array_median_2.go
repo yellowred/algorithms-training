@@ -51,120 +51,54 @@ func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
 	log.Println(nums1, len(nums1))
 	log.Println(nums2, len(nums2))
 
-	if len(nums1) == 0 {
-		return arrayMedian(nums2)
-	} else if len(nums2) == 0 {
-		return arrayMedian(nums1)
+	m := len(nums1)
+	n := len(nums2)
+	if m > n { // to ensure m<=n
+		temp := nums1
+		nums1 = nums2
+		nums2 = temp
+		tmp := m
+		m = n
+		n = tmp
 	}
 
-	// what diff in slices do we need before we are ready for median
-	f := 1
-	if math.Mod(float64(len(nums1)+len(nums2)), 2) == 0 {
-		f = 0
-	}
-	log.Println(f)
-
-	i, j := 0, 0
-	shift_i := centerPosition(nums1)
-	shift_j := centerPosition(nums2)
-
+	iMin := 0
+	iMax := m
+	halfLen := (m + n + 1) / 2
 	steps := 0
-	for {
-		log.Println("i=", i, ", j=", j, ", shift_i=", shift_i, ", shift_j=", shift_j)
-		if largestSide(nums1, nums2, i, j, f) < 0 || (largestSide(nums1, nums2, i, j, f) == 0 && (safeMax(nums1, nums2, i, j) > safeMin(nums1, nums2, i+1, j+1))) { // left side is bigger -- it donates
-			if j < 0 || i >= 0 && nums1[i] > nums2[j] { // nums1 donates
-				i = i - shift_i
-				if i < 0 { // so we can find right neighbour
-					i = -1
-				}
-				shift_i = lowerShift(shift_i)
-			} else { // nums2 donates
-				j = j - shift_j
-				if j < 0 { // so we can find right neighbour
-					j = -1
-				}
-				shift_j = lowerShift(shift_j)
-			}
-		} else if largestSide(nums1, nums2, i, j, f) > 0 { // right side is bigger -- it donates
-			if j == len(nums2)-1 || i < len(nums1)-1 && nums1[i+1] < nums2[j+1] { // nums1 donates
-				i = i + shift_i
-				if i >= len(nums1) { // so we can find right neighbour
-					i = len(nums1) - 1
-				}
-				shift_i = lowerShift(shift_i)
-			} else { // nums2 donates
-				j = j + shift_j
-				if j >= len(nums2) { // so we can find right neighbour
-					j = len(nums2) - 1
-				}
-				shift_j = lowerShift(shift_j)
-			}
-		} else { // balanced
-			if f == 0 {
-				return float64(safeMax(nums1, nums2, i, j)+safeMin(nums1, nums2, i+1, j+1)) / 2
+	for iMin <= iMax {
+		i := (iMin + iMax) / 2
+		j := halfLen - i
+		if i < iMax && nums2[j-1] > nums1[i] {
+			iMin = i + 1 // i is too small
+		} else if i > iMin && nums1[i-1] > nums2[j] {
+			iMax = i - 1 // i is too big
+		} else { // i is perfect
+			maxLeft := float64(0)
+			if i == 0 {
+				maxLeft = float64(nums2[j-1])
+			} else if j == 0 {
+				maxLeft = float64(nums1[i-1])
 			} else {
-				// edge cases first -- nums1 or nums2 do not contribute to the right side
-				return float64(safeMin(nums1, nums2, i+1, j+1))
+				maxLeft = math.Max(float64(nums1[i-1]), float64(nums2[j-1]))
 			}
+			if math.Mod(float64(m+n), 2) > 0 {
+				return maxLeft
+			}
+
+			minRight := float64(0)
+			if i == m {
+				minRight = float64(nums2[j])
+			} else if j == n {
+				minRight = float64(nums1[i])
+			} else {
+				minRight = math.Min(float64(nums2[j]), float64(nums1[i]))
+			}
+
+			return (maxLeft + minRight) / 2.0
 		}
 		steps++
-		if steps > 100 {
-			panic("error")
-		}
+		log.Println("steps=", steps)
 	}
-}
-
-func lowerShift(shift int) int {
-	shift--
-	if shift <= 0 {
-		return 1
-	}
-	return shift
-}
-
-func largestSide(nums1, nums2 []int, i, j, f int) int {
-	if i+1+j+1+f > len(nums1)-i-1+len(nums2)-j-1 { // left
-		return -1
-	} else if i+1+j+1+f < len(nums1)-i-1+len(nums2)-j-1 {
-		return 1
-	}
-	return 0
-}
-
-// some of the indexes must be valid
-func safeMin(arr1, arr2 []int, i, j int) int {
-	if i < 0 || i >= len(arr1) {
-		return arr2[j]
-	}
-	if j < 0 || j >= len(arr2) {
-		return arr1[i]
-	}
-	if arr1[i] < arr2[j] {
-		return arr1[i]
-	}
-	return arr2[j]
-}
-
-func safeMax(arr1, arr2 []int, i, j int) int {
-	if i < 0 || i >= len(arr1) {
-		return arr2[j]
-	}
-	if j < 0 || j >= len(arr2) {
-		return arr1[i]
-	}
-	if arr1[i] > arr2[j] {
-		return arr1[i]
-	}
-	return arr2[j]
-}
-
-func arrayMedian(arr []int) float64 {
-	if len(arr)%2 == 0 {
-		return float64(arr[int(len(arr)/2)-1]+arr[int(len(arr)/2)]) / 2
-	}
-	return float64(arr[int(len(arr)/2)])
-}
-
-func centerPosition(nums []int) int {
-	return int(math.Round(float64(len(nums)) / 2))
+	return 0.0
 }
