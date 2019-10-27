@@ -2,16 +2,12 @@ package main
 
 import (
 	"log"
+	"regexp"
+	"strings"
 )
 
 func main() {
-	// [[1,1],[1,1],[2,3]]
-	log.Println(maxPoints([][]int{[]int{5, 1}, []int{1, 1}, []int{1, 1}, []int{2, 3}, []int{2, 3}, []int{1, 1}, []int{3, 5}}))
-
-	log.Println(maxPoints([][]int{[]int{0, 0}, []int{0, 0}}))
-
-	//[[0,0],[94911151,94911150],[94911152,94911151]]
-	log.Println(maxPoints([][]int{[]int{0, 0}, []int{94911151, 94911150}, []int{94911152, 94911151}}))
+	log.Println(isNumber("1e3"))
 }
 
 func isMatch(s string, p string) bool {
@@ -138,4 +134,20 @@ func slope(p1 []int, p2 []int) float64 {
 		slope = 0
 	}
 	return slope
+}
+
+func isNumber(s string) bool {
+	s = strings.TrimSpace(s)
+	if len(s) == 0 {
+		return false
+	}
+	r := regexp.MustCompile(`(^[^0-9]+$`)
+	if !r.MatchString(s) {
+		return false
+	}
+	vs := strings.Split(s, "e")
+	if len(vs) > 2 {
+		return false
+	}
+	return true
 }
