@@ -18,6 +18,8 @@ func main() {
 	// A: [[hit hot dot dog cog] [hit hot lot log cog]]
 }
 
+// Runtime: 3668 ms, faster than 5.88% of Go online submissions for Word Ladder II.
+// Memory Usage: 20.1 MB, less than 100.00% of Go online submissions for Word Ladder II.
 func findLadders(beginWord string, endWord string, wordList []string) [][]string {
 
 	queue := [][]string{}
