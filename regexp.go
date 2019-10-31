@@ -55,29 +55,41 @@ func isMatch(s string, p string) bool {
 // 32. Longest Valid Parentheses
 // Given a string containing just the characters '(' and ')', find the length
 // of the longest valid (well-formed) parentheses substring.
-func longestValidParentheses(s string) int {
+type Parenthesis struct {
+    ch byte
+    i int
+}
 
+func longestValidParentheses(s string) int {
 	lp := "("
 	rp := ")"
 
 	i := 0
 
 	max := 0
-	stack := []int{}
-	startIndex := -1
+	stack := []Parenthesis{}
+	startIndex := 0
 	for i < len(s) {
 		if s[i] == lp[0] {
-			stack = append(stack, i)
+	            stack = append(stack, Parenthesis{ch: lp[0], i: i})
+	            log.Println("lp", stack)
 		} else if s[i] == rp[0] {
-			if len(stack) > 0 {
-				stack = stack[0 : len(stack)-1]
-				if len(stack) > 0 {
-					startIndex = stack[len(stack)-1]
+			if len(stack) > 0 && stack[len(stack)-1].ch == lp[0] {
+		                stack = stack[0 : len(stack)-1]
+        	        	if len(stack) > 0 {
+		                  startIndex = stack[len(stack)-1].i
+                		} else {
+				  startIndex = -1
 				}
-				log.Println(i, startIndex)
-				if max < i-startIndex {
-					max = i - startIndex
-				}
+		                log.Println(i, startIndex, stack)
+                		if max < i-startIndex {
+		                    max = i - startIndex
+                		}
+
+		                log.Println(i, startIndex, stack, max)
+			} else {
+			  stack = append(stack, Parenthesis{ch: rp[0], i: i})
+	                  log.Println("rp", stack)
 			}
 		} else {
 			panic("incorrect symbol")
@@ -85,6 +97,9 @@ func longestValidParentheses(s string) int {
 		i++
 	}
 	return max
+<<<<<<< HEAD
+}
+=======
 }
 
 // 149. Max Points on a Line
@@ -151,3 +166,4 @@ func isNumber(s string) bool {
 	}
 	return true
 }
+>>>>>>> 4747750d398f9329d4261bd32b59682072233186
