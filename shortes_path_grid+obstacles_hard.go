@@ -57,10 +57,6 @@ func shortestPath(grid [][]int, k int) int {
 			row := queueNode[0] + rowNum[i]
 			col := queueNode[1] + colNum[i]
 
-			// log.Println("Queue=", queue)
-			// log.Println("Visited=", visited)
-			// if adjacent cell is valid, has path and
-			// not visited yet, enqueue it.
 			if row >= 0 && col >= 0 && row < m && col < n {
 				nCost := queueNode[2] - grid[row][col]
 
