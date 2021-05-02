@@ -10,7 +10,7 @@ Explanation: The answer is "abc", with the length of 3.
 
 ## Solution
 
-```
+```python
 class Solution:
     def lengthOfLongestSubstring(self, s: str) -> int:
         chars = [0] * 128
